@@ -1,0 +1,6 @@
+{
+  "name": "Student Feedback Management System",
+  "description": "A clean, beginner-friendly full-stack college mini project for managing student feedback with CRUD operations, SQLite database, FastAPI REST API, and responsive UI.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

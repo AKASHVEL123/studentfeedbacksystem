@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Student Feedback Management System</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- Top Navigation Header -->
+  <header class="site-header">
+    <div class="header-container">
+      <div class="brand-wrapper">
+        <div class="brand-icon" aria-hidden="true">🎓</div>
+        <div class="brand-text">
+          <h1>Student Feedback Management System</h1>
+          <p>College Mini Project &bull; Academic Quality Assessment</p>
+        </div>
+      </div>
+      <div class="header-meta">
+        <span class="badge-tag">
+          <span class="badge-pulse"></span>
+          <span id="apiStatusBadge">API Connected</span>
+        </span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Dashboard Container -->
+  <main class="main-content">
+
+    <!-- KPI Statistics Grid -->
+    <section class="stats-grid" aria-label="Feedback Metrics Overview">
+      <div class="stat-card">
+        <div class="stat-info">
+          <div class="stat-label">Total Feedbacks</div>
+          <div class="stat-value" id="statTotalCount">0</div>
+        </div>
+        <div class="stat-icon">📝</div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-info">
+          <div class="stat-label">Average Rating</div>
+          <div class="stat-value" id="statAvgRating">0.0 / 5</div>
+        </div>
+        <div class="stat-icon">⭐</div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-info">
+          <div class="stat-label">5-Star Reviews</div>
+          <div class="stat-value" id="statTopRatings">0</div>
+        </div>
+        <div class="stat-icon">🏆</div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-info">
+          <div class="stat-label">Departments</div>
+          <div class="stat-value" id="statDeptCount">0</div>
+        </div>
+        <div class="stat-icon">🏛️</div>
+      </div>
+    </section>
+
+    <!-- Search, Filters, and Add Feedback Button -->
+    <section class="dashboard-controls" aria-label="Controls and Actions">
+      <div class="search-filter-group">
+        <div class="search-box">
+          <span class="search-icon">🔍</span>
+          <input
+            type="text"
+            id="searchInput"
+            placeholder="Search by student name, register number, department..."
+            aria-label="Search feedbacks"
+          />
+        </div>
+
+        <select id="departmentFilter" class="filter-select" aria-label="Filter by department">
+          <option value="ALL">All Departments</option>
+          <option value="Computer Science & Engineering">Computer Science & Engineering</option>
+          <option value="Information Technology">Information Technology</option>
+          <option value="Electronics & Communication">Electronics & Communication</option>
+          <option value="Mechanical Engineering">Mechanical Engineering</option>
+          <option value="Artificial Intelligence & Data Science">AI & Data Science</option>
+        </select>
+
+        <select id="ratingFilter" class="filter-select" aria-label="Filter by rating">
+          <option value="ALL">All Ratings</option>
+          <option value="5">⭐⭐⭐⭐⭐ 5 Stars</option>
+          <option value="4">⭐⭐⭐⭐ 4 Stars</option>
+          <option value="3">⭐⭐⭐ 3 Stars</option>
+          <option value="2">⭐⭐ 2 Stars</option>
+          <option value="1">⭐ 1 Star</option>
+        </select>
+      </div>
+
+      <button id="openAddModalBtn" class="btn-primary" type="button">
+        <span>➕</span> Add Feedback
+      </button>
+    </section>
+
+    <!-- Feedback Records Table Card -->
+    <section class="table-card" aria-label="Student Feedbacks Table">
+      <div class="table-header-bar">
+        <div class="table-title">
+          <span>Student Feedback Records</span>
+          <span class="table-count-badge" id="tableCountBadge">0 records</span>
+        </div>
+      </div>
+
+      <div class="table-responsive">
+        <table class="feedback-table" id="feedbackTable">
+          <thead>
+            <tr>
+              <th scope="col">ID</th>
+              <th scope="col">Student Name</th>
+              <th scope="col">Register No.</th>
+              <th scope="col">Department</th>
+              <th scope="col">Rating</th>
+              <th scope="col">Feedback</th>
+              <th scope="col">Created Date</th>
+              <th scope="col">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="feedbackTableBody">
+            <!-- Table rows populated dynamically by script.js -->
+            <tr>
+              <td colspan="8" class="table-loading-state">
+                <div class="loading-spinner"></div>
+                <div>Loading student feedback records...</div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Modal 1: Add / Edit Feedback Form Modal -->
+  <div id="feedbackModal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal-container">
+      <div class="modal-header">
+        <h2 id="modalTitle">Add Student Feedback</h2>
+        <button type="button" class="modal-close-btn" id="closeFormModalBtn" aria-label="Close dialog">&times;</button>
+      </div>
+
+      <div class="modal-body">
+        <form id="feedbackForm" novalidate>
+          <input type="hidden" id="feedbackId" />
+
+          <div class="form-grid">
+            <!-- Student Name -->
+            <div class="form-group form-group-full">
+              <label class="form-label" for="studentNameInput">
+                Student Name <span class="required-asterisk">*</span>
+              </label>
+              <input
+                type="text"
+                id="studentNameInput"
+                class="form-control"
+                placeholder="e.g. Aarav Sharma"
+                required
+              />
+              <div class="field-error-msg" id="nameErrorMsg">Please enter student name (at least 2 characters).</div>
+            </div>
+
+            <!-- Register Number -->
+            <div class="form-group">
+              <label class="form-label" for="registerNumberInput">
+                Register Number <span class="required-asterisk">*</span>
+              </label>
+              <input
+                type="text"
+                id="registerNumberInput"
+                class="form-control"
+                placeholder="e.g. 2023CS101"
+                required
+              />
+              <div class="field-error-msg" id="regErrorMsg">Please enter register number.</div>
+            </div>
+
+            <!-- Department -->
+            <div class="form-group">
+              <label class="form-label" for="departmentSelect">
+                Department <span class="required-asterisk">*</span>
+              </label>
+              <select id="departmentSelect" class="form-control" required>
+                <option value="">-- Select Department --</option>
+                <option value="Computer Science & Engineering">Computer Science & Engineering</option>
+                <option value="Information Technology">Information Technology</option>
+                <option value="Electronics & Communication">Electronics & Communication</option>
+                <option value="Mechanical Engineering">Mechanical Engineering</option>
+                <option value="Artificial Intelligence & Data Science">Artificial Intelligence & Data Science</option>
+                <option value="Civil Engineering">Civil Engineering</option>
+                <option value="Electrical & Electronics">Electrical & Electronics</option>
+              </select>
+              <div class="field-error-msg" id="deptErrorMsg">Please select a department.</div>
+            </div>
+
+            <!-- Email -->
+            <div class="form-group form-group-full">
+              <label class="form-label" for="emailInput">
+                Email Address
+              </label>
+              <input
+                type="email"
+                id="emailInput"
+                class="form-control"
+                placeholder="e.g. student@college.edu (optional)"
+              />
+              <div class="field-error-msg" id="emailErrorMsg">Please enter a valid email address.</div>
+            </div>
+
+            <!-- Rating (1 to 5) -->
+            <div class="form-group form-group-full">
+              <label class="form-label">
+                Rating (1 to 5) <span class="required-asterisk">*</span>
+              </label>
+              <div class="star-rating-input" id="starRatingGroup" role="radiogroup" aria-label="Rating scale 1 to 5">
+                <span data-value="1" title="1 Star - Poor">★</span>
+                <span data-value="2" title="2 Stars - Fair">★</span>
+                <span data-value="3" title="3 Stars - Good">★</span>
+                <span data-value="4" title="4 Stars - Very Good">★</span>
+                <span data-value="5" title="5 Stars - Excellent">★</span>
+                <span class="rating-text-hint" id="ratingLabelHint">Select rating</span>
+              </div>
+              <input type="hidden" id="ratingValue" value="5" />
+              <div class="field-error-msg" id="ratingErrorMsg">Please select a rating between 1 and 5.</div>
+            </div>
+
+            <!-- Feedback comments -->
+            <div class="form-group form-group-full">
+              <label class="form-label" for="feedbackTextInput">
+                Feedback Comments <span class="required-asterisk">*</span>
+              </label>
+              <textarea
+                id="feedbackTextInput"
+                class="form-control"
+                rows="4"
+                placeholder="Enter feedback regarding courses, laboratory facilities, faculty, or campus infrastructure..."
+                required
+              ></textarea>
+              <div class="field-error-msg" id="feedbackErrorMsg">Feedback must be at least 5 characters long.</div>
+            </div>
+          </div>
+
+          <!-- Form Buttons -->
+          <div class="form-actions">
+            <button type="button" class="btn-secondary" id="cancelFormBtn">Cancel</button>
+            <button type="submit" class="btn-primary" id="saveFeedbackBtn">
+              <span>💾</span> Submit Feedback
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 2: View Single Feedback Details Modal -->
+  <div id="viewModal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="viewModalTitle">
+    <div class="modal-container">
+      <div class="modal-header">
+        <h2 id="viewModalTitle">Feedback Details</h2>
+        <button type="button" class="modal-close-btn" id="closeViewModalBtn" aria-label="Close dialog">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="view-detail-card" id="viewDetailContent">
+          <!-- Populated dynamically via script.js -->
+        </div>
+        <div class="form-actions">
+          <button type="button" class="btn-secondary" id="closeViewBottomBtn">Close</button>
+          <button type="button" class="btn-action btn-edit" id="editFromViewBtn">✏️ Edit This Feedback</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 3: Delete Confirmation Modal -->
+  <div id="deleteModal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="deleteModalTitle">
+    <div class="modal-container" style="max-width: 440px;">
+      <div class="modal-header" style="background-color: #fef2f2; border-bottom-color: #fee2e2;">
+        <h2 id="deleteModalTitle" style="color: #991b1b;">Confirm Deletion</h2>
+        <button type="button" class="modal-close-btn" id="closeDeleteModalBtn" aria-label="Close dialog">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p style="color: #334155; margin-bottom: 1rem; font-size: 0.95rem;">
+          Are you sure you want to permanently delete this student feedback?
+        </p>
+        <div style="background-color: #f8fafc; padding: 0.85rem; border-radius: 6px; border: 1px solid #e2e8f0; font-size: 0.875rem;">
+          <strong>Student:</strong> <span id="deleteStudentNameText">-</span><br>
+          <strong>Register No:</strong> <span id="deleteRegNumText">-</span>
+        </div>
+        <div class="form-actions">
+          <button type="button" class="btn-secondary" id="cancelDeleteBtn">Cancel</button>
+          <button type="button" class="btn-action btn-delete" id="confirmDeleteBtn" style="padding: 0.65rem 1.25rem; font-size: 0.9rem;">
+            🗑️ Delete Permanently
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div id="toastContainer" class="toast-container" aria-live="polite"></div>
+
+  <!-- Footer -->
+  <footer class="site-footer">
+    <p><strong>Student Feedback Management System</strong> &bull; College Mini Project</p>
+    <div class="footer-badge">FastAPI &bull; SQLite ORM &bull; HTML5 &bull; CSS3 &bull; Vanilla JavaScript</div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
